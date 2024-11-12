@@ -176,7 +176,7 @@ resource "azurerm_virtual_machine_extension" "setup_script" {
   {
     "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File setup.ps1",
     "fileUris": [
-      "https://raw.githubusercontent.com/YOUR_REPO/setup.ps1"  # You'll need to host this file
+      "https://raw.githubusercontent.com/mjam03/glasto/refs/heads/main/setup.ps1"
     ]
   }
   SETTINGS
