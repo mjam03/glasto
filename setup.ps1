@@ -8,6 +8,51 @@ try {
     Write-Output "Creating automation directory..."
     New-Item -ItemType Directory -Force -Path "C:\automation" | Out-Null
     
+    # Download Firefox using alternative method
+    Write-Output "Downloading Firefox..."
+    $firefoxUrl = "https://download-installer.cdn.mozilla.net/pub/firefox/releases/latest/win64/en-US/Firefox%20Setup.exe"
+    $firefoxInstaller = "C:\automation\firefox-installer.exe"
+    
+    # Try multiple methods to download Firefox
+    try {
+        (New-Object System.Net.WebClient).DownloadFile($firefoxUrl, $firefoxInstaller)
+    } catch {
+        Write-Output "WebClient failed, trying alternative Firefox version..."
+        # Try specific version instead of latest
+        $fallbackUrl = "https://download-installer.cdn.mozilla.net/pub/firefox/releases/115.0/win64/en-US/Firefox%20Setup%20115.0.exe"
+        Start-BitsTransfer -Source $fallbackUrl -Destination $firefoxInstaller
+    }
+    
+    # Verify Firefox download
+    if (!(Test-Path $firefoxInstaller)) {
+        throw "Firefox installer not downloaded successfully"
+    }
+    
+    Write-Output "Firefox downloaded successfully. File size: $((Get-Item $firefoxInstaller).length) bytes"
+    
+    # Install Firefox with timeout and error handling
+    Write-Output "Installing Firefox..."
+    $processStartTime = Get-Date
+    $process = Start-Process -FilePath $firefoxInstaller -ArgumentList "/S" -Wait -PassThru
+    
+    if ($process.ExitCode -ne 0) {
+        Write-Output "Firefox installer completed with non-zero exit code: $($process.ExitCode)"
+    } else {
+        Write-Output "Firefox installed successfully"
+    }
+    
+    # Verify Firefox installation
+    $firefoxPath = "${env:ProgramFiles}\Mozilla Firefox\firefox.exe"
+    if (!(Test-Path $firefoxPath)) {
+        Write-Output "Firefox executable not found at expected location"
+        $firefoxPath = "${env:ProgramFiles(x86)}\Mozilla Firefox\firefox.exe"
+        if (!(Test-Path $firefoxPath)) {
+            throw "Firefox installation failed - executable not found"
+        }
+    }
+    
+    Write-Output "Firefox installation verified at: $firefoxPath"
+    
     # Download Python
     Write-Output "Downloading Python..."
     $pythonUrl = "https://www.python.org/ftp/python/3.9.7/python-3.9.7-amd64.exe"
@@ -19,17 +64,6 @@ try {
     $pythonInstallArgs = "/quiet InstallAllUsers=1 PrependPath=1"
     $process = Start-Process -FilePath $pythonInstaller -ArgumentList $pythonInstallArgs -Wait -PassThru
     Write-Output "Python installer completed with exit code: $($process.ExitCode)"
-    
-    # Download Firefox
-    Write-Output "Downloading Firefox..."
-    $firefoxUrl = "https://download.mozilla.org/?product=firefox-latest&os=win64&lang=en-US"
-    $firefoxInstaller = "C:\automation\firefox-installer.exe"
-    Invoke-WebRequest -Uri $firefoxUrl -OutFile $firefoxInstaller
-    
-    # Install Firefox
-    Write-Output "Installing Firefox..."
-    $process = Start-Process -FilePath $firefoxInstaller -ArgumentList "/S" -Wait -PassThru
-    Write-Output "Firefox installer completed with exit code: $($process.ExitCode)"
     
     # Install Python packages
     Write-Output "Installing Python packages..."

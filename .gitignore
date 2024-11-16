@@ -3,3 +3,11 @@
 terraform.tfstate
 terraform.tfstate.backup
 terraform.tfvars
+*.py
+*.toml
+*.lock
+setup.ps1
+main_linux.tf
+ip_lookup.sh
+.venv
+.mypy_cache
