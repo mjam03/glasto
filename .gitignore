@@ -6,8 +6,9 @@ terraform.tfvars
 *.py
 *.toml
 *.lock
-setup.ps1
-main_linux.tf
+*.ps1
+*main_linux.tf
 ip_lookup.sh
 .venv
 .mypy_cache
+*.sh
